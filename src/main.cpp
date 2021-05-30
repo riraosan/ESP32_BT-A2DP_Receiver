@@ -58,6 +58,7 @@ class Application {
             .data_in_num  = I2S_PIN_NO_CHANGE  //Use in i2s_pin_config_t for pins which should not be changed
         };
 
+        //Settings for ES9038Q2M VR1.07 DAC Board(eBay item number:263908779821)
         i2s_config_t i2s_config = {
             .mode                 = (i2s_mode_t)(I2S_MODE_MASTER | I2S_MODE_TX),
             .sample_rate          = 44100,                       // corrected by info from bluetooth
