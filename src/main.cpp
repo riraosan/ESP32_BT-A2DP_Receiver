@@ -59,6 +59,7 @@ class Application {
         };
 
         //Settings for ES9038Q2M VR1.07 DAC Board(eBay item number:263908779821)
+        //I2S : PCM 44.1K-384K 32BIT
         i2s_config_t i2s_config = {
             .mode                 = (i2s_mode_t)(I2S_MODE_MASTER | I2S_MODE_TX),
             .sample_rate          = 44100,                       // corrected by info from bluetooth
@@ -66,10 +67,11 @@ class Application {
             .channel_format       = I2S_CHANNEL_FMT_RIGHT_LEFT,  // 2-channels
             .communication_format = I2S_COMM_FORMAT_I2S,         // I2S communication format I2S
             .intr_alloc_flags     = ESP_INTR_FLAG_LEVEL1,        // default interrupt priority
-            .dma_buf_count        = 8,
-            .dma_buf_len          = 64,
-            .use_apll             = false,  //I2S using APLL as main I2S clock, enable it to get accurate clock
-            .tx_desc_auto_clear   = true};
+            .dma_buf_count        = 8,                           // default
+            .dma_buf_len          = 64,                          // default
+            .use_apll             = false,                       // I2S using APLL as main I2S clock, enable it to get accurate clock
+            .tx_desc_auto_clear   = true                         // I2S auto clear tx descriptor if there is underflow condition
+        };
 
         _a2dp_sink.set_pin_config(pin_config);
         _a2dp_sink.set_i2s_config(i2s_config);
