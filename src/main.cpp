@@ -51,7 +51,7 @@ class Application {
         pinMode(_BLUE_LED_PORT, OUTPUT);
         pinMode(_GREEN_LED_PORT, OUTPUT);
 
-        i2s_pin_config_t pin_config = {
+        _pin_config = {
             .bck_io_num   = 26,
             .ws_io_num    = 22,
             .data_out_num = 25,
@@ -60,7 +60,7 @@ class Application {
 
         //Settings for ES9038Q2M VR1.07 DAC Board(eBay item number:263908779821)
         //I2S : PCM 44.1K-384K 32BIT
-        i2s_config_t i2s_config = {
+        _i2s_config = {
             .mode                 = (i2s_mode_t)(I2S_MODE_MASTER | I2S_MODE_TX),
             .sample_rate          = 44100,                       // corrected by info from bluetooth
             .bits_per_sample      = I2S_BITS_PER_SAMPLE_32BIT,   // I2S bits per sample: 32-bits
@@ -73,8 +73,8 @@ class Application {
             .tx_desc_auto_clear   = true                         // I2S auto clear tx descriptor if there is underflow condition
         };
 
-        _a2dp_sink.set_pin_config(pin_config);
-        _a2dp_sink.set_i2s_config(i2s_config);
+        _a2dp_sink.set_pin_config(_pin_config);
+        _a2dp_sink.set_i2s_config(_i2s_config);
         _a2dp_sink.set_on_data_received(on_data_receive_callback);
         _a2dp_sink.set_avrc_metadata_callback(avrc_metadata_callback);
         _a2dp_sink.start("Riraosan Player");
@@ -91,6 +91,8 @@ class Application {
     BluetoothA2DPSink _a2dp_sink;
     constexpr static int _BLUE_LED_PORT  = 32;
     constexpr static int _GREEN_LED_PORT = 33;
+    i2s_config_t _i2s_config;
+    i2s_pin_config_t _pin_config;
 };
 
 static Application theApp;
