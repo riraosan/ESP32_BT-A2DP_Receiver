@@ -67,7 +67,7 @@ class Application {
         i2s_config_t i2s_config = {
             .mode                 = (i2s_mode_t)(I2S_MODE_MASTER | I2S_MODE_TX),
             .sample_rate          = 44100,                       // corrected by info from bluetooth
-            .bits_per_sample      = I2S_BITS_PER_SAMPLE_8BIT,    // I2S bits per sample: 16-bits
+            .bits_per_sample      = I2S_BITS_PER_SAMPLE_8BIT,    // I2S bits per sample: 8-bits
             .channel_format       = I2S_CHANNEL_FMT_RIGHT_LEFT,  // 2-channels
             .communication_format = I2S_COMM_FORMAT_I2S,         // I2S communication format I2S
             .intr_alloc_flags     = ESP_INTR_FLAG_LEVEL1,        // default interrupt priority
@@ -82,7 +82,7 @@ class Application {
         _a2dp_sink.expand_audio_bits_per_sample(I2S_BITS_PER_SAMPLE_32BIT);  //for I2S : PCM 44.1K-384K 32BIT
         _a2dp_sink.set_on_data_received(on_data_receive_callback);
         _a2dp_sink.set_avrc_metadata_callback(avrc_metadata_callback);
-        _a2dp_sink.start("Riraosan Player");
+        _a2dp_sink.start("Riraosan Player", false);
     }
 
     void handle(void) {
