@@ -28,14 +28,31 @@ SOFTWARE.
 
 class Application {
    public:
-    Application() {
-        //init...
-    }
+    Application() {}
 
     ~Application() {}
 
     static void avrc_metadata_callback(uint8_t id, const uint8_t* text) {
-        log_i("==> AVRC metadata rsp: attribute id 0x%x, %s\n", id, text);
+        log_i("==> AVRC metadata rsp");
+        String str((char*)text);
+
+        switch (id) {
+            case 0x01:
+                log_i("==>　曲名：%s", str.c_str());
+                break;
+            case 0x02:
+                log_i("==>　アーティスト：%s", str.c_str());
+                break;
+            case 0x04:
+                log_i("==>　アルバム名：%s", str.c_str());
+                break;
+            case 0x20:
+                log_i("==>　ジャンル：%s", str.c_str());
+                break;
+            default:
+                log_i("==>　Unknown：%s", str.c_str());
+                break;
+        }
     }
 
     static void on_data_receive_callback(void) {
@@ -81,18 +98,31 @@ class Application {
         _a2dp_sink.expand_audio_bits_per_sample(I2S_BITS_PER_SAMPLE_32BIT);  //for I2S : PCM 44.1K-384K 32BIT
         _a2dp_sink.set_on_data_received(on_data_receive_callback);
         _a2dp_sink.set_avrc_metadata_callback(avrc_metadata_callback);
+
         _a2dp_sink.start("Riraosan Player", true);
     }
 
     void handle(void) {
-        if (_a2dp_sink.get_audio_state() == ESP_A2D_AUDIO_STATE_STARTED) {
-            delay(1000);
-            log_i("changing state...");
+        if (_a2dp_sink.isConnected()) {
+            digitalWrite(_GREEN_LED_PORT, HIGH);
+        } else {
+            digitalWrite(_GREEN_LED_PORT, LOW);
+        }
+
+        switch (_a2dp_sink.get_audio_state()) {
+            case ESP_A2D_AUDIO_STATE_STARTED:
+                break;
+            case ESP_A2D_AUDIO_STATE_STOPPED:
+            case ESP_A2D_AUDIO_STATE_REMOTE_SUSPEND:
+                digitalWrite(_BLUE_LED_PORT, LOW);
+                break;
+            default:
+                break;
         }
     }
 
    private:
     BluetoothA2DPSink _a2dp_sink;
-    constexpr static int _BLUE_LED_PORT  = 32;
-    constexpr static int _GREEN_LED_PORT = 33;
+    constexpr static int _BLUE_LED_PORT  = 33;
+    constexpr static int _GREEN_LED_PORT = 32;
 };
