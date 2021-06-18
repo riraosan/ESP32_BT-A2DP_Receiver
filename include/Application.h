@@ -83,7 +83,7 @@ class Application {
         i2s_config_t i2s_config = {
             .mode                 = (i2s_mode_t)(I2S_MODE_MASTER | I2S_MODE_TX),
             .sample_rate          = 44100,                       // corrected by info from bluetooth
-            .bits_per_sample      = (i2s_bits_per_sample_t)0,    // set expand_audio_bits_per_sample()
+            .bits_per_sample      = (i2s_bits_per_sample_t)16,   // set_bits_per_sample()
             .channel_format       = I2S_CHANNEL_FMT_RIGHT_LEFT,  // 2-channels
             .communication_format = I2S_COMM_FORMAT_I2S,         // I2S communication format I2S
             .intr_alloc_flags     = ESP_INTR_FLAG_LEVEL1,        // default interrupt priority
@@ -95,7 +95,7 @@ class Application {
 
         _a2dp_sink.set_pin_config(pin_config);
         _a2dp_sink.set_i2s_config(i2s_config);
-        _a2dp_sink.expand_audio_bits_per_sample(I2S_BITS_PER_SAMPLE_32BIT);  //for I2S : PCM 44.1K-384K 32BIT
+        _a2dp_sink.set_bits_per_sample(I2S_BITS_PER_SAMPLE_32BIT);  //for I2S : PCM 44.1K-384K 32BIT
         _a2dp_sink.set_on_data_received(on_data_receive_callback);
         _a2dp_sink.set_avrc_metadata_callback(avrc_metadata_callback);
 
