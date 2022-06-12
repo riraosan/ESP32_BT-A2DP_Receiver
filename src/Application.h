@@ -1,7 +1,7 @@
 /*
 The MIT License (MIT)
 
-Copyright (c) 2020-2021 riraosan.github.io
+Copyright (c) 2020-2022 riraosan.github.io
 
 Permission is hereby granted, free of charge, to any person obtaining a copy
 of this software and associated documentation files (the "Software"), to deal
@@ -24,10 +24,9 @@ SOFTWARE.
 
 #include <Arduino.h>
 #include <BluetoothA2DPSink.h>
+#include <M5Atom.h>
+#include <FastLED.h>
 #include <esp32-hal-log.h>
-
-constexpr int _BLUE_LED_PORT  = 33;
-constexpr int _GREEN_LED_PORT = 32;
 
 class Application {
  public:
@@ -59,9 +58,9 @@ class Application {
   static void on_data_receive_callback(void) {
     static int count;
     if (++count % 100 == 0) {
-      digitalWrite(_BLUE_LED_PORT, HIGH);
+      M5.dis.drawpix(0, 0x00FF00);
     } else {
-      digitalWrite(_BLUE_LED_PORT, LOW);
+      M5.dis.drawpix(0, 0x000000);
     }
   }
 #ifdef TEST
@@ -70,17 +69,17 @@ class Application {
   }
 #endif
   void setup(void) {
-    pinMode(_BLUE_LED_PORT, OUTPUT);
-    pinMode(_GREEN_LED_PORT, OUTPUT);
+    M5.begin(true, false, true);
+    delay(50);
 
     i2s_pin_config_t pin_config = {
-        .bck_io_num   = 26,
+        .bck_io_num   = 21,
         .ws_io_num    = 22,
         .data_out_num = 25,
-        .data_in_num  = I2S_PIN_NO_CHANGE  //Use in i2s_pin_config_t for pins which should not be changed
+        .data_in_num  = I2S_PIN_NO_CHANGE  // Use in i2s_pin_config_t for pins which should not be changed
     };
 
-    //Settings for ES9038Q2M VR1.07 DAC Board(eBay item number:263908779821)
+    // Settings for ES9038Q2M VR1.07 DAC Board(eBay item number:263908779821)
     i2s_config_t i2s_config = {
         .mode                 = (i2s_mode_t)(I2S_MODE_MASTER | I2S_MODE_TX),
         .sample_rate          = 44100,                       // corrected by info from bluetooth
@@ -96,29 +95,27 @@ class Application {
 
     _a2dp_sink.set_pin_config(pin_config);
     _a2dp_sink.set_i2s_config(i2s_config);
-    _a2dp_sink.set_bits_per_sample(I2S_BITS_PER_SAMPLE_32BIT);  //for I2S : PCM 44.1K-384K 32BIT
+    _a2dp_sink.set_bits_per_sample(I2S_BITS_PER_SAMPLE_32BIT);  // for I2S : PCM 44.1K-384K 32BIT
     _a2dp_sink.set_on_data_received(on_data_receive_callback);
     _a2dp_sink.set_avrc_metadata_callback(avrc_metadata_callback);
 
     _a2dp_sink.start("Riraosan Player", false);
   }
 
-  void handle(void) {
-    if (_a2dp_sink.isConnected()) {
-      digitalWrite(_GREEN_LED_PORT, HIGH);
+  void update(void) {
+    if (_a2dp_sink.is_connected()) {
+      switch (_a2dp_sink.get_audio_state()) {
+        case ESP_A2D_AUDIO_STATE_STARTED:
+          break;
+        case ESP_A2D_AUDIO_STATE_STOPPED:
+        case ESP_A2D_AUDIO_STATE_REMOTE_SUSPEND:
+          M5.dis.drawpix(0, 0x0000FF);
+          break;
+        default:
+          break;
+      }
     } else {
-      digitalWrite(_GREEN_LED_PORT, LOW);
-    }
-
-    switch (_a2dp_sink.get_audio_state()) {
-      case ESP_A2D_AUDIO_STATE_STARTED:
-        break;
-      case ESP_A2D_AUDIO_STATE_STOPPED:
-      case ESP_A2D_AUDIO_STATE_REMOTE_SUSPEND:
-        digitalWrite(_BLUE_LED_PORT, LOW);
-        break;
-      default:
-        break;
+      M5.dis.drawpix(0, 0xFF0000);
     }
   }
 

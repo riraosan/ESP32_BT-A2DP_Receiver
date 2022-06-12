@@ -24,12 +24,12 @@ SOFTWARE.
 
 #include <Application.h>
 
-static Application theApp;
+static Application app;
 
 void setup() {
-    theApp.setup();
+  app.setup();
 }
 
 void loop() {
-    theApp.handle();
+  app.update();
 }
