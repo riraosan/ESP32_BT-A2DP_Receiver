@@ -24,7 +24,7 @@ SOFTWARE.
 
 #include <Application.h>
 
-static Application app;
+Application app;
 
 void setup() {
   app.setup();

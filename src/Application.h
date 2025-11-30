@@ -24,8 +24,7 @@ SOFTWARE.
 
 #include <Arduino.h>
 #include <BluetoothA2DPSink.h>
-#include <M5Atom.h>
-#include <FastLED.h>
+#include <M5Unified.h>
 #include <esp32-hal-log.h>
 
 class Application {
@@ -50,7 +49,7 @@ class Application {
         log_i("==>　ジャンル：%s", text);
         break;
       default:
-        log_i("==>　Unknown：%s", text);
+        // log_i("==>　Unknown：%s", text);
         break;
     }
   }
@@ -58,9 +57,9 @@ class Application {
   static void on_data_receive_callback(void) {
     static int count;
     if (++count % 100 == 0) {
-      M5.dis.drawpix(0, 0x00FF00);
+      // M5.dis.drawpix(0, 0x00FF00);
     } else {
-      M5.dis.drawpix(0, 0x000000);
+      // M5.dis.drawpix(0, 0x000000);
     }
   }
 #ifdef TEST
@@ -69,13 +68,13 @@ class Application {
   }
 #endif
   void setup(void) {
-    M5.begin(true, false, true);
+    M5.begin();
     delay(50);
 
     i2s_pin_config_t pin_config = {
-        .bck_io_num   = 21,
-        .ws_io_num    = 22,
-        .data_out_num = 25,
+        .bck_io_num   = 13,
+        .ws_io_num    = 0,
+        .data_out_num = 15,
         .data_in_num  = I2S_PIN_NO_CHANGE  // Use in i2s_pin_config_t for pins which should not be changed
     };
 
@@ -85,7 +84,7 @@ class Application {
         .sample_rate          = 44100,                       // corrected by info from bluetooth
         .bits_per_sample      = (i2s_bits_per_sample_t)16,   // set_bits_per_sample()
         .channel_format       = I2S_CHANNEL_FMT_RIGHT_LEFT,  // 2-channels
-        .communication_format = I2S_COMM_FORMAT_I2S,         // I2S communication format I2S
+        .communication_format = I2S_COMM_FORMAT_STAND_I2S,   // I2S communication format I2S
         .intr_alloc_flags     = ESP_INTR_FLAG_LEVEL1,        // default interrupt priority
         .dma_buf_count        = 8,                           // default
         .dma_buf_len          = 64,                          // default
@@ -109,13 +108,13 @@ class Application {
           break;
         case ESP_A2D_AUDIO_STATE_STOPPED:
         case ESP_A2D_AUDIO_STATE_REMOTE_SUSPEND:
-          M5.dis.drawpix(0, 0x0000FF);
+          // M5.dis.drawpix(0, 0x0000FF);
           break;
         default:
           break;
       }
     } else {
-      M5.dis.drawpix(0, 0xFF0000);
+      // M5.dis.drawpix(0, 0xFF0000);
     }
   }
 
