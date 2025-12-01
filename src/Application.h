@@ -1,7 +1,7 @@
 /*
 The MIT License (MIT)
 
-Copyright (c) 2020-2022 riraosan.github.io
+Copyright (c) 2020-2025 riraosan.github.io
 
 Permission is hereby granted, free of charge, to any person obtaining a copy
 of this software and associated documentation files (the "Software"), to deal
@@ -38,15 +38,29 @@ class Application {
     switch (id) {
       case 0x01:
         log_i("==>　曲名：%s", text);
+        M5.Display.setCursor(0, 0);
+        M5.Display.fillScreen(TFT_BLACK);
+        M5.Display.printf("曲名：");
+        M5.Display.println((char*)text);
+        M5.Display.println();
         break;
       case 0x02:
         log_i("==>　アーティスト：%s", text);
+        M5.Display.printf("アーティスト：");
+        M5.Display.println((char*)text);
+        M5.Display.println();
         break;
       case 0x04:
         log_i("==>　アルバム名：%s", text);
+        M5.Display.printf("アルバム名：");
+        M5.Display.println((char*)text);
+        M5.Display.println();
         break;
       case 0x20:
         log_i("==>　ジャンル：%s", text);
+        M5.Display.printf("ジャンル：");
+        M5.Display.println((char*)text);
+        M5.Display.println();
         break;
       default:
         // log_i("==>　Unknown：%s", text);
@@ -69,6 +83,12 @@ class Application {
 #endif
   void setup(void) {
     M5.begin();
+
+    M5.Display.setFont(&fonts::lgfxJapanGothicP_16);
+    M5.Display.setTextColor(TFT_WHITE, TFT_BLACK);
+    M5.Display.setCursor(0, 0);
+    M5.Display.println("This is the Riraosan Player.");
+    M5.Display.println("iPhoneより「Riraosan Player」に接続してください。");
     delay(50);
 
     i2s_pin_config_t pin_config = {
@@ -78,7 +98,7 @@ class Application {
         .data_in_num  = I2S_PIN_NO_CHANGE  // Use in i2s_pin_config_t for pins which should not be changed
     };
 
-    // Settings for ES9038Q2M VR1.07 DAC Board(eBay item number:263908779821)
+    // Settings for 32bit DAC Board
     i2s_config_t i2s_config = {
         .mode                 = (i2s_mode_t)(I2S_MODE_MASTER | I2S_MODE_TX),
         .sample_rate          = 44100,                       // corrected by info from bluetooth
