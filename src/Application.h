@@ -25,6 +25,7 @@ SOFTWARE.
 #include <Arduino.h>
 #include <BluetoothA2DPSink.h>
 #include <M5Unified.h>
+#include <Button2.h>
 #include <esp32-hal-log.h>
 
 class Application {
@@ -32,8 +33,31 @@ class Application {
   Application() {
   }
 
+  static void avrc_rn_play_pos_callback(uint32_t play_pos) {
+    log_i("Play position is %d (%d seconds)\n", play_pos, (int)round(play_pos / 1000.0));
+  }
+
+  static void avrc_rn_playstatus_callback(esp_avrc_playback_stat_t playback) {
+    switch (playback) {
+      case esp_avrc_playback_stat_t::ESP_AVRC_PLAYBACK_STOPPED:
+        log_i("Stopped.");
+        break;
+      case esp_avrc_playback_stat_t::ESP_AVRC_PLAYBACK_PLAYING:
+        log_i("Playing.");
+        break;
+      case esp_avrc_playback_stat_t::ESP_AVRC_PLAYBACK_PAUSED:
+        log_i("Paused.");
+        break;
+      case esp_avrc_playback_stat_t::ESP_AVRC_PLAYBACK_ERROR:
+        log_e("Error.");
+        break;
+      default:
+        log_e("Got unknown playback status %d\n", playback);
+    }
+  }
+
   static void avrc_metadata_callback(uint8_t id, const uint8_t* text) {
-    log_i("==> AVRC metadata rsp");
+    // log_i("==> AVRC metadata rsp");
 
     switch (id) {
       case 0x01:
@@ -81,15 +105,36 @@ class Application {
     return &_a2dp_sink;
   }
 #endif
+  void initButtons(void) {
+    _buttonA.begin(39);
+
+    _buttonA.setClickHandler([this](Button2& b) {
+      log_w("Button A Clicked");
+      switch (_a2dp_sink.get_audio_state()) {
+        case ESP_A2D_AUDIO_STATE_STARTED:
+          log_w("Stop");
+          _a2dp_sink.stop();
+          break;
+        case ESP_A2D_AUDIO_STATE_STOPPED:
+        case ESP_A2D_AUDIO_STATE_REMOTE_SUSPEND:
+          log_w("Play");
+          _a2dp_sink.play();
+          break;
+        default:
+          break;
+      }
+    });
+  }
+
   void setup(void) {
     M5.begin();
+    initButtons();
 
     M5.Display.setFont(&fonts::lgfxJapanGothicP_16);
     M5.Display.setTextColor(TFT_WHITE, TFT_BLACK);
     M5.Display.setCursor(0, 0);
     M5.Display.println("This is the Riraosan Player.");
     M5.Display.println("iPhoneより「Riraosan Player」に接続してください。");
-    delay(50);
 
     i2s_pin_config_t pin_config = {
         .bck_io_num   = 13,
@@ -115,29 +160,21 @@ class Application {
     _a2dp_sink.set_pin_config(pin_config);
     _a2dp_sink.set_i2s_config(i2s_config);
     _a2dp_sink.set_bits_per_sample(I2S_BITS_PER_SAMPLE_32BIT);  // for I2S : PCM 44.1K-384K 32BIT
-    _a2dp_sink.set_on_data_received(on_data_receive_callback);
+
+    _a2dp_sink.set_avrc_rn_playstatus_callback(avrc_rn_playstatus_callback);
+    _a2dp_sink.set_avrc_rn_play_pos_callback(avrc_rn_play_pos_callback);
     _a2dp_sink.set_avrc_metadata_callback(avrc_metadata_callback);
 
     _a2dp_sink.start("Riraosan Player", false);
   }
 
   void update(void) {
-    if (_a2dp_sink.is_connected()) {
-      switch (_a2dp_sink.get_audio_state()) {
-        case ESP_A2D_AUDIO_STATE_STARTED:
-          break;
-        case ESP_A2D_AUDIO_STATE_STOPPED:
-        case ESP_A2D_AUDIO_STATE_REMOTE_SUSPEND:
-          // M5.dis.drawpix(0, 0x0000FF);
-          break;
-        default:
-          break;
-      }
-    } else {
-      // M5.dis.drawpix(0, 0xFF0000);
-    }
+    _buttonA.loop();
+
+    delay(10);
   }
 
  private:
   BluetoothA2DPSink _a2dp_sink;
+  Button2 _buttonA;
 };
